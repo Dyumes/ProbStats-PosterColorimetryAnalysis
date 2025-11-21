@@ -24,3 +24,26 @@ Other useful commands:
 # To update all packages to latest version
 (<ProjectName>) pkg> update pkg_name
 ```
+
+## Dominants colors finder
+### *Description*
+
+The [dominantsColors.jl](./src/dominantsColors.jl) file has the following goals :
+- Finding every colors on each pixel of a poster image -> (DONE) ;
+- Finding the 3 dominants colors and their porcentage in a poster -> (DONE) ;
+    - Using [Median cut](https://fr.wikipedia.org/wiki/Median_cut).
+- Storing all the data for further analysis and comparaison (DONE);
+    - Data into [colorsData.csv]()
+
+### *Libraries*
+
+
+`using Plots, FileIO, ImageShow, TestImages, ImageTransformations, ColorTypes, Colors, ImageView, Clustering, Random
+`
+
+All of these libraries has to be installed using the julia pkg installer.
+Inside a terminal : 
+
+`julia` > press `]` in the the REPL julia to enter in package mode > `add Plots FileIO ImageShow TestImages ImageTransformations ColorTypes Colors ImageView Clustering Random`.
+
+
