@@ -1,7 +1,7 @@
 # ProbStats-PosterColorimetryAnalysis
 
 ## Adding a Dependency
-**Make sure Julia is opened in the project: **
+**Make sure Julia is opened in the project:**
 ```sh
 # Press "]" to enter pkg mode
 (@v1.11) pkg> activate . # Modify "." to path to the project
@@ -36,14 +36,18 @@ The [dominantsColors.jl](./src/dominantsColors.jl) file has the following goals 
     - Data into [colorsData.csv]()
 
 ### *Libraries*
-
-
 `using Plots, FileIO, ImageShow, TestImages, ImageTransformations, ColorTypes, Colors, ImageView, Clustering, Random
 `
 
-All of these libraries has to be installed using the julia pkg installer.
+All of these libraries have to be installed using the julia pkg installer.
 Inside a terminal : 
 
 `julia` > press `]` in the the REPL julia to enter in package mode > `add Plots FileIO ImageShow TestImages ImageTransformations ColorTypes Colors ImageView Clustering Random`.
 
+## CSV sorting
+*This program sorts the color analysis results to different files according to the genre of the movie poster.* 
+The code is located in `/src/python`.  
 
+To execute it, launch *[main.py](src/python/main.py)* (using `uv run` with uv for example)
+
+***You can change the paths if needed at the beginning of the file***
