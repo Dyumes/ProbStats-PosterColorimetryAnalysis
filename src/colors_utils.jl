@@ -1,0 +1,92 @@
+using Colors, CSV, DataFrames, StatsBase, Plots
+module ColorUtils
+
+# https://medium.com/@dijdomv01/a-beginners-guide-to-understand-the-color-models-rgb-and-hsv-244226e4b3e3
+# https://learn.leighcotnoir.com/artspeak/elements-color/hue-value-saturation/
+# TODO : Separate HSV Colors to different color bins
+
+hue_colors = Dict(
+    "red"           => [(0, 15), (360 - 15, 361)],
+    "orange"        => (16, 45),
+    "yellow"        => (46, 75),
+    "light_green"   => (76, 105),
+    "green"         => (106, 135),
+    "cyan_green"    => (136, 165),
+    "cyan"          => (166, 195),
+    "light_blue"    => (196, 225),
+    "blue"          => (226, 255),
+    "purple"        => (256, 285),
+    "magenta"       => (286, 315),
+    "pink"          => (316, 355)
+)
+const grey_sat_threshold = 0.05 # If saturation is lower than this, consider it as gray
+const black_val = 0.1  # If value is lower than this, consider it as black
+const white_sat = 0.05 # If saturation is lower than this, consider it as white
+
+"""
+Returns the color name based on its HSV values.  
+`h` = Hue (0° to 360°)  
+`s` = Saturation (0 to 1)  
+`v` = Value (0 to 1)  
+"""
+function getColor(h::Number, s::Number, v::Number)::String
+    # Find closest color
+    found_color = "None"
+    if (v <= black_val)
+        return "black"
+    elseif (s <= white_sat)
+        return "white"
+    end
+    
+    for (name, hue_range) in hue_colors
+        # Verify if color has multiple ranges (if is array, has multiple color ranges)
+        if (hue_range isa Array)
+            for hr in hue_range
+                if (h >= hr[1] && h <= hr[2])
+                    found_color = name
+                end
+            end
+        elseif (h >= hue_range[1] && h <= hue_range[2])
+            found_color = name
+        end
+    end
+
+    return found_color
+end
+
+function getLightness(h::Number, s::Number, v::Number)::String
+    THRESHOLD = 0.5
+
+    if (v > THRESHOLD)
+        return "light"
+    else
+        return "dark"
+    end
+end
+
+function testColors()
+    # Black and White tests
+    @assert getColor(125, 0, 0) == "black"
+    @assert getColor(125, 0, 0) != "white"
+    @assert getColor(165, 0, 1) == "white"
+    @assert getColor(165, 0, 0.9) == "white"
+
+    # Full colors tests
+    @assert getColor(360, 1, 1) == "red"
+    @assert getColor(12, 1, 1) == "red"
+    @assert getColor(17, 1, 1) == "orange"
+    @assert getColor(160, 1, 1) == "cyan_green"
+    @assert getColor(225, 1, 1) != "blue"
+
+    # Light Dark colors
+    @assert getLightness(255, 0, 0) == "dark"
+    @assert getLightness(255, 0, 1) == "light"
+
+    println("All tests passed!")
+end
+
+# println(getColor(270, 1, 0))
+
+testColors()
+
+end # end module ColorUtils
