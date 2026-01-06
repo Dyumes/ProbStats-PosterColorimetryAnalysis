@@ -1,177 +1,230 @@
-#https://juliahub.com/ui/Packages/General/ImageIO/0.6.0
-#https://juliahub.com/ui/Packages/General/ImageShow
+using Plots, FileIO, ImageShow, TestImages, ImageTransformations,
+      ColorTypes, Colors, ImageView, Random, Statistics,
+      DelimitedFiles, CSV, DataFrames, Clustering
 
-using Plots, FileIO, ImageShow, TestImages, ImageTransformations, ColorTypes, Colors, ImageView, Random, Statistics, DelimitedFiles, CSV, DataFrames
+# Author : Gaëtan Veuillet
+# Date : november 2025
+# Description : Analyze a single poster (or multiple) and find 3 dominant colors using K-means.
+# GUI display, RGB cloud, image reconstruction, and CSV export added.
 
-#Author : Gaëtan Veuillet
-#Date : november 2025
-#Description : This program analyze a single poster (can be reported for multiple posters) and find the 3 dominant colors using Median Cut.
+# GLOBAL SETTINGS
+Random.seed!(42) # For reproducibility
 
-#TODO : SEE IF MEDIAN CUT IS GOOD. IDK IF WE CAN USE PROCENTAGE OF OTHER NON DOMINANT COLORS
-#TODO : CSV FILE WITH ID AND 3 DOMINATNS(R1, G1, B1, R2, G2, B2, ...) COLORS + FREE SPACE FOR GENRE
-
-#GLOBAL SETTINGS
-Random.seed!(42) #For reproducibility and fix randomness
-
-function main()
-    resetCsv()
-    files = readdir("../data/posters/") #Only for information and further usage
-    nbrFiles = length(files)
-
-    imgToAnalyze = "../data/posters/2.jpg"
-    global loaded_img = load(imgToAnalyze)
-    p = plot(loaded_img)
-
-    try
-        for i in 1:10
-            try
-                #Only for visual information
-                #sleep(0.5)
-                #p = plot()
-                new_img = "../data/posters/$(i).jpg"
-                loaded_img = load(new_img)
-                
-                #Only for visual information
-                #plot!(loaded_img)
-                all_colors = findColors(loaded_img)
-                dominantColors = findDominantColors(all_colors, 3)
-                addDominantToCsv(dominantColors, i)
-                #Only for visual information
-                #gui()
-            catch e
-                println("Files nbr : $(i) caused an error: $e")
-            end
-        end
-    catch e
-        println("Interrupted by user") #Doesn't work yet :(, it's for CTRL + C
-    end
-
-end
-
+#Extract each pixel rgb
 function findColors(img)
     result = []
     pixels = vec(img)
-    print("Finding colors...\n")
-    for (i, pixel) in enumerate(pixels)
+    #print("Finding colors...\n")
+    for pixel in pixels
         r = round(Int, 255 * red(pixel))
-        g = round(Int, 255*green(pixel))
-        b = round(Int, 255*blue(pixel))
+        g = round(Int, 255 * green(pixel))
+        b = round(Int, 255 * blue(pixel))
         push!(result, (r,g,b))
-        #println("Pixel $i : R=$r, G=$g, B=$b")
     end
-    print("All colors found !\n")
+    #print("All colors found\n")
     return result
 end
 
-#Using Median Cut to find dominant colors
-function findDominantColors(rgbArray, k) #k = number of colors, in our case it's 3 (for now)
-    print("Finding dominant colors (Median Cut)...\n")
-    
-    #Start with all pixels in one box
-    boxes = [rgbArray]
+"""Returns the HSV values (Hue = [0,255], Saturation = [0,1], Value = [0,1])"""
+function RGBtoHSV(r::Number, g::Number, b::Number)
+    r /= 255
+    g /= 255
+    b /= 255
 
-    #Split boxes until we have k boxes
-    while length(boxes) < k
-        max_range = 0
-        box_idx = 0
-        axis_idx = 0
-        for (i, box) in enumerate(boxes)
-            #Compute range per channel
-            ranges = [maximum([c[j] for c in box]) - minimum([c[j] for c in box]) for j in 1:3]
-            local_max = maximum(ranges)
-            if local_max > max_range
-                max_range = local_max
-                box_idx = i
-                axis_idx = findfirst(==(local_max), ranges)
-            end
+    maxRGB = max(r, g, b)
+    minRGB = min(r, g, b)
+    delta = maxRGB - minRGB
+
+    value = maxRGB    # V = Value
+    hue = 0.0         # H = Hue
+    saturation = 0.0  # S = Saturation
+
+    if value != 0
+        saturation = delta / value
+    end
+
+    if delta != 0
+        if maxRGB == r
+            hue = 60 * ((g - b) / delta)
+        elseif maxRGB == g
+            hue = 60 * (2 + (b - r) / delta)
+        else
+            hue = 60 * (4 + (r - g) / delta)
         end
-
-        #Split the selected box along axis with largest range
-        box = boxes[box_idx]
-        sorted_box = sort(box, by = x -> x[axis_idx])
-        mid = Int(floor(length(sorted_box)/2))
-        box1 = sorted_box[1:mid]
-        box2 = sorted_box[mid+1:end]
-        boxes[box_idx] = box1
-        push!(boxes, box2)
     end
 
-    #Compute the mean color of each box (initial dominant colors)
-    dominant_colors = []
-    for box in boxes
-        r = round(Int, mean([c[1] for c in box]))
-        g = round(Int, mean([c[2] for c in box]))
-        b = round(Int, mean([c[3] for c in box]))
-        push!(dominant_colors, (r,g,b))
+    if hue < 0
+        hue += 360
     end
 
-    #Compute true percentages based on all pixels of the image
-    counts = zeros(Int, length(dominant_colors))
-    for pixel in rgbArray
-        #Find index of closest dominant color
-        distances = [sqrt(sum((pixel[i]-c[i])^2 for i in 1:3)) for c in dominant_colors]
-        idx = argmin(distances)
-        counts[idx] += 1
-    end
-    total_pixels = length(rgbArray)
-    percentages = [round(100*c/total_pixels,digits=2) for c in counts]
-    dominant_colors_with_pct = [(c[1],c[2],c[3],pct) for (c,pct) in zip(dominant_colors,percentages)]
-
-    print("DOminant colors found!\n")
-    println("Dominant colors : $dominant_colors_with_pct\n")
-
-    #Square of each dominant color
-    for (i,color) in enumerate(dominant_colors_with_pct)
-        plot!(Shape(
-            [-100, -50, -50, -100], 
-            [20*(i-1), 20*(i-1), 20*i, 20*i]),
-            color = RGB(color[1]/255, color[2]/255, color[3]/255),
-            label = "Dominant Color $i - $(color[4])%")
-    end
-
-    return dominant_colors_with_pct
+    hue = hue * 255 / 360
+    return (hue, saturation, value)
 end
 
+#K-mean to compute dominant colors (HSV)
+function findDominantColors(rgbArray, k)
+    #print("Finding dominant colors (K-means HSV)...\n")
+
+    hsvArray = [RGBtoHSV(c[1], c[2], c[3]) for c in rgbArray]
+    X = hcat([Float64[h[1], h[2], h[3]] for h in hsvArray]...)
+
+    res = kmeans(X, k; maxiter=100, display=:none)
+
+    counts = zeros(Int, k)
+    for idx in res.assignments
+        counts[idx] += 1
+    end
+
+    total_pixels = length(rgbArray)
+    percentages = [round(100*c/total_pixels, digits=2) for c in counts]
+
+    dominantColors = [(res.centers[1,j],
+                       res.centers[2,j],
+                       res.centers[3,j],
+                       percentages[j]) for j in 1:k]
+
+    dominantColors = sort(dominantColors, by=x->x[4], rev=true)[1:3]
+
+    println("Dominant HSV colors : $dominantColors\n")
+    return dominantColors
+end
+
+#Rgb 3d visualization
+function plotRGBCloud(rgbArray; max_points=50000)
+    N = length(rgbArray)
+    data = N > max_points ? rgbArray[randperm(N)[1:max_points]] : rgbArray
+
+    Rs = [c[1] for c in data]
+    Gs = [c[2] for c in data]
+    Bs = [c[3] for c in data]
+    colors_plot = [RGB(c[1]/255, c[2]/255, c[3]/255) for c in data]
+
+    scatter3d(
+        Rs, Gs, Bs,
+        markersize = 2,
+        markercolor = colors_plot,
+        xlabel = "Red", ylabel = "Green", zlabel = "Blue",
+        title = "RGB Pixel Distribution (3D Point Cloud)",
+        legend = false,
+        xlim = (0,255), ylim = (0,255), zlim = (0,255)
+    )
+end
+
+#Dominant color cloud visualization
+function plotClusteredPixelCloud(rgbArray, dominantColors; max_points=2000)
+    N = length(rgbArray)
+    data = N > max_points ? rgbArray[randperm(N)[1:max_points]] : rgbArray
+
+    dom_rgb = [
+        RGB(HSV(c[1] * 360 / 255, c[2], c[3]))
+        for c in dominantColors
+    ]
+
+    clustered_colors = [
+        dom_rgb[argmin([
+            (RGB(px[1]/255,px[2]/255,px[3]/255).r-d.r)^2 +
+            (RGB(px[1]/255,px[2]/255,px[3]/255).g-d.g)^2 +
+            (RGB(px[1]/255,px[2]/255,px[3]/255).b-d.b)^2
+            for d in dom_rgb
+        ])]
+        for px in data
+    ]
+
+    Rs = [round(Int,255*c.r) for c in clustered_colors]
+    Gs = [round(Int,255*c.g) for c in clustered_colors]
+    Bs = [round(Int,255*c.b) for c in clustered_colors]
+
+    scatter3d(
+        Rs, Gs, Bs,
+        markersize=2,
+        markercolor=clustered_colors,
+        xlabel="Red", ylabel="Green", zlabel="Blue",
+        title="Final centroids after clustering",
+        legend=false,
+        xlim=(0,255), ylim=(0,255), zlim=(0,255)
+    )
+end
+
+function reconstructImage(img, dominantColors)
+    pixels = vec(img)
+
+    dom_rgb = [
+        RGB(HSV(c[1] * 360 / 255, c[2], c[3]))
+        for c in dominantColors
+    ]
+
+    new_pixels = Vector{RGB}(undef, length(pixels))
+
+    for (i, px) in enumerate(pixels)
+        distances = [(px.r-d.r)^2 + (px.g-d.g)^2 + (px.b-d.b)^2 for d in dom_rgb]
+        new_pixels[i] = dom_rgb[argmin(distances)]
+    end
+
+    return reshape(new_pixels, size(img))
+end
+
+#Show the 3 dominants colors as blocks
+function showDominantColorBlocks(dominantColors)
+    p = plot(title="Dominant Colors Blocks", legend=false, xlim=(0,3), ylim=(0,1))
+    for (i,color) in enumerate(dominantColors)
+        rgb = RGB(HSV(color[1] * 360 / 255, color[2], color[3]))
+        plot!(Shape([i-1,i,i,i-1],[0,0,1,1]),
+              color = rgb,
+              label = "")
+    end
+    display(p)
+end
+
+#Csv functions
 CSV_file = "../data/colorsData.csv"
 
 function resetCsv()
     df = DataFrame(
         id = Int[],
-        d_c1_r = Int[], d_c1_g = Int[], d_c1_b = Int[], d_c1_pc = Float64[],
-        d_c2_r = Int[], d_c2_g = Int[], d_c2_b = Int[], d_c2_pc = Float64[],
-        d_c3_r = Int[], d_c3_g = Int[], d_c3_b = Int[], d_c3_pc = Float64[],
+        d_c1_h = Float64[], d_c1_s = Float64[], d_c1_v = Float64[], d_c1_pc = Float64[],
+        d_c2_h = Float64[], d_c2_s = Float64[], d_c2_v = Float64[], d_c2_pc = Float64[],
+        d_c3_h = Float64[], d_c3_s = Float64[], d_c3_v = Float64[], d_c3_pc = Float64[]
     )
-
     CSV.write(CSV_file, df)
-    print("CSV cleared !\n")
+    print("CSV cleared\n")
 end
 
 function addDominantToCsv(dominantColors, posterId)
-    #print("Dominants Colors : ", dominantColors, " Poster's ID : ", posterId)
     df = DataFrame(
-        #ID - for each color(R - G - B - %)
         id = [posterId],
-        d_c1_r = dominantColors[1][1],
-        d_c1_g = dominantColors[1][2],
-        d_c1_b = dominantColors[1][3],
-        d_c1_pc = dominantColors[1][4],
-
-        d_c2_r = dominantColors[2][1],
-        d_c2_g = dominantColors[2][2],
-        d_c2_b = dominantColors[2][3],
-        d_c2_pc = dominantColors[2][4],
-
-        d_c3_r = dominantColors[3][1],
-        d_c3_g = dominantColors[3][2],
-        d_c3_b = dominantColors[3][3],
-        d_c3_pc = dominantColors[3][4],
+        d_c1_h = dominantColors[1][1], d_c1_s = dominantColors[1][2], d_c1_v = dominantColors[1][3], d_c1_pc = dominantColors[1][4],
+        d_c2_h = dominantColors[2][1], d_c2_s = dominantColors[2][2], d_c2_v = dominantColors[2][3], d_c2_pc = dominantColors[2][4],
+        d_c3_h = dominantColors[3][1], d_c3_s = dominantColors[3][2], d_c3_v = dominantColors[3][3], d_c3_pc = dominantColors[3][4]
     )
-
     CSV.write(CSV_file, df, append=true)
-    #print("\n", dominantColors[1][1])
-    print("CSV file written for poster : ", posterId)
-
+    print("CSV file written for poster : ", posterId, "\n")
 end
 
-#Main call
+#Main
+function main()
+    resetCsv()
+    files = readdir("../data/posters/")
+
+    for i in 1:10
+        try
+            img_path = "../data/posters/$(i).jpg"
+            loaded_img = load(img_path)
+
+            all_colors = findColors(loaded_img)
+            dominantColors = findDominantColors(all_colors, 6)
+            addDominantToCsv(dominantColors, i)
+
+            display(plot(loaded_img, title="Original Image")); readline()
+            display(plotRGBCloud(all_colors)); readline()
+            display(plotClusteredPixelCloud(all_colors, dominantColors)); readline()
+            display(plot(reconstructImage(loaded_img, dominantColors), title="Reconstructed Image")); readline()
+            showDominantColorBlocks(dominantColors); readline()
+
+        catch e
+            println("File number $(i) caused an error: $e")
+        end
+    end
+end
+
+# Run main
 main()
