@@ -8,7 +8,7 @@ export getColor, getLightness, colors_list, colors_map
 
 """Defines the color ranges that are returned by `getColor` function"""
 hue_colors = Dict(
-    "red"           => [(0, 15), (360 - 15, 361)],
+    "red"           => [(-1, 15), (360 - 15, 361)],
     "orange"        => (15, 45),
     "yellow"        => (45, 75),
     "light_green"   => (75, 105),
@@ -50,7 +50,7 @@ function getColor(h::Number, s::Number, v::Number)::String
 
     # Check if color is gray
     if (s <= grey_sat_threshold && v <= grey_val_threshold)
-        return "gray"
+        return "grey"
     end
     
     # Find closest color

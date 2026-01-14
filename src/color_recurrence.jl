@@ -56,9 +56,15 @@ for color in all_HSV_colors
     hsv_colors_recurrence[color] += 1
 end
 
+totalCount = 0
+
 for (color,count) in hsv_colors_recurrence
     println(color, " : ", count)
+    global totalCount += count
 end
+
+println()
+println("Total : ",totalCount)
 
 #Order dico to match colors_list order
 color_counts = [hsv_colors_recurrence[name] for name in color_names]
