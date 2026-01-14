@@ -25,6 +25,19 @@ function findColors(img)
     return result
 end
 
+"""
+Convert HSV from Julia/standard convention to target convention
+(hue rotated by +90 degrees)
+Input  : H ∈ [0,255]
+Output : H ∈ [0,255]
+"""
+function rotateHueForExport(h)
+    h_deg = h * 360 / 255
+    h_deg = mod(h_deg + 90, 360)
+    return h_deg * 255 / 360
+end
+
+
 """Returns the HSV values (Hue = [0,255], Saturation = [0,1], Value = [0,1])"""
 function RGBtoHSV(r::Number, g::Number, b::Number)
     r /= 255
@@ -57,7 +70,7 @@ function RGBtoHSV(r::Number, g::Number, b::Number)
         hue += 360
     end
 
-    hue = hue * 255 / 360
+    #hue = hue * 255 / 360
     return (hue, saturation, value)
 end
 
@@ -85,7 +98,7 @@ function findDominantColors(rgbArray, k)
 
     dominantColors = sort(dominantColors, by=x->x[4], rev=true)[1:3]
 
-    println("Dominant HSV colors : $dominantColors\n")
+    #println("Dominant HSV colors : $dominantColors\n")
     return dominantColors
 end
 
@@ -192,11 +205,14 @@ end
 function addDominantToCsv(dominantColors, posterId)
     df = DataFrame(
         id = [posterId],
-        d_c1_h = dominantColors[1][1], d_c1_s = dominantColors[1][2], d_c1_v = dominantColors[1][3], d_c1_pc = dominantColors[1][4],
-        d_c2_h = dominantColors[2][1], d_c2_s = dominantColors[2][2], d_c2_v = dominantColors[2][3], d_c2_pc = dominantColors[2][4],
-        d_c3_h = dominantColors[3][1], d_c3_s = dominantColors[3][2], d_c3_v = dominantColors[3][3], d_c3_pc = dominantColors[3][4]
+        d_c1_h = dominantColors[1][1] , d_c1_s = dominantColors[1][2], d_c1_v = dominantColors[1][3], d_c1_pc = dominantColors[1][4],
+        d_c2_h = dominantColors[2][1] , d_c2_s = dominantColors[2][2], d_c2_v = dominantColors[2][3], d_c2_pc = dominantColors[2][4],
+        d_c3_h = dominantColors[3][1] , d_c3_s = dominantColors[3][2], d_c3_v = dominantColors[3][3], d_c3_pc = dominantColors[3][4]
     )
+    
     CSV.write(CSV_file, df, append=true)
+    #println("Dominant HSV colors : $df\n")
+
     print("CSV file written for poster : ", posterId, "\n")
 end
 

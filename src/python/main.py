@@ -2,15 +2,16 @@ import csv
 
 def main():
     # Config
-    colorFileName = "./data/output/colorsData_v2.csv"   # Path of the CSV file containing unsorted color data
-    movieFileName = "./data/db/movies.csv"              # Path of the CSV file containing movie data
-    outputDir = "./data/output/csv"                     # Path of the folder where the CSV files will be output
+    colorFileName = "../../data/output/colorsData_v2.csv"   # Path of the CSV file containing unsorted color data
+    movieFileName = "../../data/db/movies.csv"              # Path of the CSV file containing movie data
+    outputDir = "../../data/output/csv"                     # Path of the folder where the CSV files will be output
+    
 
     genres = []
     output = {}
     header = ""
     print("Analyzing files...")
-    with open(colorFileName, mode='r') as colorFile, open(movieFileName, mode='r') as movieFile:
+    with open(colorFileName, mode='r', encoding="utf-8-sig", newline="") as colorFile, open(movieFileName, mode='r', encoding="utf-8-sig", newline="") as movieFile:
         colorCSV = list(csv.reader(colorFile, delimiter=','))
         movieCSV = list(csv.reader(movieFile, delimiter=','))
 
