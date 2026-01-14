@@ -1,6 +1,8 @@
 using Colors, CSV, DataFrames, StatsBase, Plots
 module ColorUtils
 
+export getColor, getLightness, colors_list, colors_map
+
 # https://medium.com/@dijdomv01/a-beginners-guide-to-understand-the-color-models-rgb-and-hsv-244226e4b3e3
 # https://learn.leighcotnoir.com/artspeak/elements-color/hue-value-saturation/
 # TODO : Separate HSV Colors to different color bins
@@ -88,5 +90,26 @@ end
 # println(getColor(270, 1, 0))
 
 testColors()
+
+"""Colors names orderd for plotting visual"""
+colors_list = ["yellow","orange","red","pink","magenta","purple","blue","light_blue","cyan","cyan_green","green","light_green","black","grey","white"]
+"""Give a color to the color name for plotting visual"""
+colors_map = Dict(
+        "yellow" => "#FFFF00",    
+        "orange" => "#FF8000",     
+        "red" => "#FF0000",        
+        "pink" => "#FF0080",  
+        "magenta" => "#FF00FF",
+        "purple" => "#8000FF",
+        "blue" => "#0000FF",
+        "light_blue" => "#0080FF", 
+        "cyan" => "#00FFFF",  
+        "cyan_green" => "#00FF80", 
+        "green" => "#00FF00",
+        "light_green" => "#80FF00", 
+        "black" => "#000000",     
+        "grey" => "#808080",      
+        "white" => "#FFFFFF"      
+    )
 
 end # end module ColorUtils
