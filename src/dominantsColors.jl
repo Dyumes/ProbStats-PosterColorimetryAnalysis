@@ -176,7 +176,7 @@ function showDominantColorBlocks(dominantColors)
 end
 
 #Csv functions
-CSV_file = "../data/colorsData.csv"
+CSV_file = "../data/colorsData_HSV.csv"
 
 function resetCsv()
     df = DataFrame(
