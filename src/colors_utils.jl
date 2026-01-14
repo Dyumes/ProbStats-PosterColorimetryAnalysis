@@ -67,6 +67,10 @@ function getColor(h::Number, s::Number, v::Number)::String
         end
     end
 
+    if (found_color == "None")
+        error("Color not found for H: $h, S: $s, V: $v")
+    end
+    
     return found_color
 end
 

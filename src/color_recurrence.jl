@@ -5,7 +5,7 @@ f = ColorUtils.getColor(0,0,0)
 println(f)
 
 #----------------------------Get data from CSV-----------------------------
-data = CSV.read("data/colorsData.csv", DataFrame,delim = ',',select=1:13,silencewarnings=true)
+data = CSV.read("data/colorsData_HSV.csv", DataFrame,delim = ',',select=1:13,silencewarnings=true)
 #println(data)
 
 matrice = Matrix(data)
