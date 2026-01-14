@@ -1,3 +1,5 @@
+# Author Carolina Oliveira Ribeiro
+
 using Colors, CSV, DataFrames, StatsBase, Plots
 
 
@@ -735,7 +737,7 @@ println(getBasicColorName(0,150,140))
 println(getJuliaColorName(0,150,140))
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-data = CSV.read("colorsData.csv", DataFrame,delim = ',',select=1:13,silencewarnings=true)
+data = CSV.read("colorsData1.csv", DataFrame,delim = ',',select=1:13,silencewarnings=true)
 #println(data)
 
 matrice = Matrix(data)

@@ -1,10 +1,12 @@
 using Colors, CSV, DataFrames, StatsBase, Plots
 module ColorUtils
 
+export getColor, getLightness, colors_list, colors_map
+
 # https://medium.com/@dijdomv01/a-beginners-guide-to-understand-the-color-models-rgb-and-hsv-244226e4b3e3
 # https://learn.leighcotnoir.com/artspeak/elements-color/hue-value-saturation/
-# TODO : Separate HSV Colors to different color bins
 
+"""Defines the color ranges that are returned by `getColor` function"""
 hue_colors = Dict(
     "red"           => [(0, 15), (360 - 15, 361)],
     "orange"        => (16, 45),
@@ -18,10 +20,10 @@ hue_colors = Dict(
     "purple"        => (256, 285),
     "magenta"       => (286, 315),
     "pink"          => (316, 355)
+    # gray
+    # black
+    # white
 )
-const grey_sat_threshold = 0.05 # If saturation is lower than this, consider it as gray
-const black_val = 0.1  # If value is lower than this, consider it as black
-const white_sat = 0.05 # If saturation is lower than this, consider it as white
 
 """
 Returns the color name based on its HSV values.  
@@ -30,14 +32,28 @@ Returns the color name based on its HSV values.
 `v` = Value (0 to 1)  
 """
 function getColor(h::Number, s::Number, v::Number)::String
-    # Find closest color
+    grey_sat_threshold = 0.05 # If saturation is lower than this, consider it as gray
+    grey_val_threshold = 0.65 # If value is lower than this, consider it as gray
+
+    black_val = 0.1           # If value is lower (<=) than this, consider it as black
+
+    white_val = 0.8           # If value is higher (>=) than this, consider it as white
+    white_sat = 0.05          # If saturation is lower (<=) than this, consider it as white
+
+    # 
     found_color = "None"
     if (v <= black_val)
         return "black"
-    elseif (s <= white_sat)
+    elseif (s <= white_sat && v >= white_val)
         return "white"
     end
+
+    # Check if color is gray
+    if (s <= grey_sat_threshold && v <= grey_val_threshold)
+        return "gray"
+    end
     
+    # Find closest color
     for (name, hue_range) in hue_colors
         # Verify if color has multiple ranges (if is array, has multiple color ranges)
         if (hue_range isa Array)
@@ -70,6 +86,11 @@ function testColors()
     @assert getColor(125, 0, 0) != "white"
     @assert getColor(165, 0, 1) == "white"
     @assert getColor(165, 0, 0.9) == "white"
+    
+    # Gray tests
+    @assert getColor(225, 0.05, 0.40) == "gray"
+    @assert getColor(45, 0.02, 0.42) == "gray"
+    @assert getColor(225, 0, 0.80) == "white"
 
     # Full colors tests
     @assert getColor(360, 1, 1) == "red"
@@ -88,5 +109,26 @@ end
 # println(getColor(270, 1, 0))
 
 testColors()
+
+"""Colors names orderd for plotting visual"""
+colors_list = ["yellow","orange","red","pink","magenta","purple","blue","light_blue","cyan","cyan_green","green","light_green","black","grey","white"]
+"""Give a color to the color name for plotting visual"""
+colors_map = Dict(
+        "yellow" => "#FFFF00",    
+        "orange" => "#FF8000",     
+        "red" => "#FF0000",        
+        "pink" => "#FF0080",  
+        "magenta" => "#FF00FF",
+        "purple" => "#8000FF",
+        "blue" => "#0000FF",
+        "light_blue" => "#0080FF", 
+        "cyan" => "#00FFFF",  
+        "cyan_green" => "#00FF80", 
+        "green" => "#00FF00",
+        "light_green" => "#80FF00", 
+        "black" => "#000000",     
+        "grey" => "#808080",      
+        "white" => "#FFFFFF"      
+    )
 
 end # end module ColorUtils
