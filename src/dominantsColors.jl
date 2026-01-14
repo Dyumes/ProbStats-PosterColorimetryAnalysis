@@ -205,7 +205,7 @@ function main()
     resetCsv()
     files = readdir("../data/posters/")
 
-    for i in 1:10
+    for i in 1:131262
         try
             img_path = "../data/posters/$(i).jpg"
             loaded_img = load(img_path)
@@ -214,11 +214,11 @@ function main()
             dominantColors = findDominantColors(all_colors, 6)
             addDominantToCsv(dominantColors, i)
 
-            display(plot(loaded_img, title="Original Image")); readline()
-            display(plotRGBCloud(all_colors)); readline()
-            display(plotClusteredPixelCloud(all_colors, dominantColors)); readline()
-            display(plot(reconstructImage(loaded_img, dominantColors), title="Reconstructed Image")); readline()
-            showDominantColorBlocks(dominantColors); readline()
+            #display(plot(loaded_img, title="Original Image")); readline()
+            #display(plotRGBCloud(all_colors)); readline()
+            #display(plotClusteredPixelCloud(all_colors, dominantColors)); readline()
+            #display(plot(reconstructImage(loaded_img, dominantColors), title="Reconstructed Image")); readline()
+            #showDominantColorBlocks(dominantColors); readline()
 
         catch e
             println("File number $(i) caused an error: $e")
