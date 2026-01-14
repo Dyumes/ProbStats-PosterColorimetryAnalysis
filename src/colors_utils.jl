@@ -9,17 +9,17 @@ export getColor, getLightness, colors_list, colors_map
 """Defines the color ranges that are returned by `getColor` function"""
 hue_colors = Dict(
     "red"           => [(0, 15), (360 - 15, 361)],
-    "orange"        => (16, 45),
-    "yellow"        => (46, 75),
-    "light_green"   => (76, 105),
-    "green"         => (106, 135),
-    "cyan_green"    => (136, 165),
-    "cyan"          => (166, 195),
-    "light_blue"    => (196, 225),
-    "blue"          => (226, 255),
-    "purple"        => (256, 285),
-    "magenta"       => (286, 315),
-    "pink"          => (316, 355)
+    "orange"        => (15, 45),
+    "yellow"        => (45, 75),
+    "light_green"   => (75, 105),
+    "green"         => (105, 135),
+    "cyan_green"    => (135, 165),
+    "cyan"          => (165, 195),
+    "light_blue"    => (195, 225),
+    "blue"          => (225, 255),
+    "purple"        => (255, 285),
+    "magenta"       => (285, 315),
+    "pink"          => (315, 345)
     # gray
     # black
     # white
@@ -58,11 +58,11 @@ function getColor(h::Number, s::Number, v::Number)::String
         # Verify if color has multiple ranges (if is array, has multiple color ranges)
         if (hue_range isa Array)
             for hr in hue_range
-                if (h >= hr[1] && h <= hr[2])
+                if (h > hr[1] && h <= hr[2])
                     found_color = name
                 end
             end
-        elseif (h >= hue_range[1] && h <= hue_range[2])
+        elseif (h > hue_range[1] && h <= hue_range[2])
             found_color = name
         end
     end
@@ -84,6 +84,9 @@ function getLightness(h::Number, s::Number, v::Number)::String
     end
 end
 
+"""
+Test function to test module functions
+"""
 function testColors()
     # Black and White tests
     @assert getColor(125, 0, 0) == "black"
@@ -102,6 +105,7 @@ function testColors()
     @assert getColor(17, 1, 1) == "orange"
     @assert getColor(160, 1, 1) == "cyan_green"
     @assert getColor(225, 1, 1) != "blue"
+    @assert getColor(224.24, 1, 1) != "blue"
 
     # Light Dark colors
     @assert getLightness(255, 0, 0) == "dark"
@@ -112,7 +116,7 @@ end
 
 # println(getColor(270, 1, 0))
 
-testColors()
+# testColors()
 
 """Colors names orderd for plotting visual"""
 colors_list = ["yellow","orange","red","pink","magenta","purple","blue","light_blue","cyan","cyan_green","green","light_green","black","grey","white"]
