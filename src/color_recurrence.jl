@@ -8,40 +8,43 @@ println(f)
 data = CSV.read("data/colorsData_HSV.csv", DataFrame,delim = ',',select=1:13,silencewarnings=true)
 #println(data)
 
-matrice = Matrix(data)
+data_matrice = Matrix(data)
 matrice_nbL = length(matrice[:,1])
 matrice_nbC = length(matrice[1,:])
 println(matrice_nbL," X ",matrice_nbC)
 println()
 
 #-----------------------------Get colors from CSV----------------------------
-all_HSV_colors = String[]
+function get_colors_from_CSV(matrice)
+    all_HSV_colors = String[]
 
-for i in 1:matrice_nbL
-    h1 = matrice[i,2]
-    s1 = matrice[i,3]
-    v1 = matrice[i,4]
-    color1 = ColorUtils.getColor(h1,s1,v1)
-    push!(all_HSV_colors,color1)
+    for i in 1:matrice_nbL
+        h1 = matrice[i,2]
+        s1 = matrice[i,3]
+        v1 = matrice[i,4]
+        color1 = ColorUtils.getColor(h1,s1,v1)
+        push!(all_HSV_colors,color1)
 
-    h2 = matrice[i,6]
-    s2 = matrice[i,7]
-    v2 = matrice[i,8]
-    color2 = ColorUtils.getColor(h2,s2,v2)
-    push!(all_HSV_colors,color2)
+        h2 = matrice[i,6]
+        s2 = matrice[i,7]
+        v2 = matrice[i,8]
+        color2 = ColorUtils.getColor(h2,s2,v2)
+        push!(all_HSV_colors,color2)
 
-    h3 = matrice[i,10]
-    s3 = matrice[i,11]
-    v3 = matrice[i,12]
-    color3 = ColorUtils.getColor(h3,s3,v3)
-    push!(all_HSV_colors,color3)
+        h3 = matrice[i,10]
+        s3 = matrice[i,11]
+        v3 = matrice[i,12]
+        color3 = ColorUtils.getColor(h3,s3,v3)
+        push!(all_HSV_colors,color3)
+    end
+    #println(all_HSV_colors)
+    println(all_HSV_colors[1:10])
+    println()
+    println(length(all_HSV_colors))
+    println()
+    return all_HSV_colors
 end
-#println(all_HSV_colors)
-println(all_HSV_colors[1:10])
-println()
-println(length(all_HSV_colors))
-println()
-
+all_HSV_colors = get_colors_from_CSV(data_matrice)
 #----------------------------Get recurrence per color--------------------------
 hsv_colors_recurrence = Dict{String,Int64}()
 color_names = ColorUtils.colors_list
