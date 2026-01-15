@@ -1,5 +1,7 @@
 include("./colors_utils.jl")
-using  .ColorUtils, CSV, DataFrames, Plots, Colors
+include("./colors_hypothesis.jl")
+include("./RGB_to_HSV.jl")
+using  .ColorUtils, CSV, DataFrames, Plots, Colors, .genreColorMatching, .RGB_to_HSV
 
 #----------------------------Get data from CSV-----------------------------
 data = CSV.read("data/colorsData_HSV.csv", DataFrame,delim = ',',select=1:13,silencewarnings=true)
@@ -37,24 +39,37 @@ println(length(all_HSV_colors))
 println()
 
 #---------------------------- Genre Color Dictionary -------------------------
-genre_colors = Dict(
-    "Action" => ["red", "black", "orange"],
-    "Romance" => ["pink", "magenta", "white"],
-    "Horror" => ["black", "red", "grey"],
-    "Comedy" => ["yellow", "orange", "light_blue"],
-    "Sci-Fi" => ["blue", "cyan", "black"],
-    "Drama" => ["grey", "black", "white"],
-    "Fantasy" => ["purple", "magenta", "blue"],
-    "Thriller" => ["black", "red", "grey"],
-    "Adventure" => ["green", "orange", "blue"]
-)
+# genre_colors = Dict(
+#     "Action" => ["red", "black", "orange"],
+#     "Romance" => ["pink", "magenta", "white"],
+#     "Horror" => ["black", "red", "grey"],
+#     "Comedy" => ["yellow", "orange", "light_blue"],
+#     "Sci-Fi" => ["blue", "cyan", "black"],
+#     "Drama" => ["grey", "black", "white"],
+#     "Fantasy" => ["purple", "magenta", "blue"],
+#     "Thriller" => ["black", "red", "grey"],
+#     "Adventure" => ["green", "orange", "blue"]
+# )
+
+genre_colors_map = Dict{String, Array{Any}}()
+
+for (genre, colors) in genre_colors
+    converted_colors = []
+    for i in 1:3
+        h, s, v = RGBtoHSV(colors[i]...)
+        println(genre, " : ", "h : ",h," s : ",s, " v : ",v)
+        push!(converted_colors, ColorUtils.getColor(h, s, v))
+    end
+    genre_colors_map[genre] = converted_colors
+end
+println(genre_colors_map)
 
 #---------------------------- Color Matching Function -------------------------
 # Keep importance of dominant colors
-function color_match_score_with_duplicates(poster_colors, genre_colors)
+function color_match_score_with_duplicates(poster_colors, genre_colors_map )
     matches = 0
     for pc in poster_colors
-        if pc in genre_colors
+        if pc in genre_colors_map 
             matches += 1
         end
     end
@@ -62,11 +77,11 @@ function color_match_score_with_duplicates(poster_colors, genre_colors)
 end
 
 # Ignores dominance
-function color_match_score_without_duplicates(poster_colors, genre_colors)
+function color_match_score_without_duplicates(poster_colors, genre_colors_map )
     unique_poster = unique(poster_colors) #if [red, red, blue] => [red, blue]
     matches = 0
     for pc in unique_poster
-        if pc in genre_colors
+        if pc in genre_colors_map 
             matches += 1
         end
     end
@@ -107,10 +122,10 @@ for i in 1:length(all_HSV_colors)
     poster_id = poster_ids[i]
     poster_colors = all_HSV_colors[i]
 
-    genre, score = find_best_genre(poster_colors, genre_colors, true)
+    genre, score = find_best_genre(poster_colors, genre_colors_map, true)
     push!(genre_results_with_duplicates, genre)
     
-    genre2, score2 = find_best_genre(poster_colors, genre_colors, false)
+    genre2, score2 = find_best_genre(poster_colors, genre_colors_map, false)
     push!(genre_results_without_duplicates, genre2)
     
     # Some differents for comparaison
