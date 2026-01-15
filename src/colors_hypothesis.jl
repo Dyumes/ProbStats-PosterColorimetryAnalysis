@@ -1,7 +1,9 @@
+include("./colors_utils.jl")
+using  .ColorUtils
 # Veuillet Gaëtan
 # Genre's 3 most current colors for further comparisons
 module genreColorMatching
-    export genre_colors
+    export get_genre_colors_names
 
     genre_colors = Dict(
     "Action" => [(0, 0.9, 0.9), (30, 0.85, 0.95), (220, 0.5, 0.25)], 
@@ -23,6 +25,20 @@ module genreColorMatching
     "War" => [(100, 0.5, 0.6), (60, 0.4, 0.55), (30, 0.45, 0.5)],
     "Western" => [(30, 0.7, 0.7), (20, 0.6, 0.6), (45, 0.55, 0.65)]
     )
+
+    function get_genre_colors_names()
+        genre_colors_map = Dict{String, Array{Any}}()
+
+        for (genre, colors) in genre_colors
+            converted_colors = []
+            for (h, s, v) in colors
+                push!(converted_colors, ColorUtils.getColor(h, s, v))
+            end
+            genre_colors_map[genre] = converted_colors
+        end
+        return genre_colors_map
+    end
+        
 
 
     genre_colors_by_our_results = Dict(
