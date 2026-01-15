@@ -20,7 +20,7 @@ hue_colors = Dict(
     "purple"        => (255, 285),
     "magenta"       => (285, 315),
     "pink"          => (315, 345)
-    # gray
+    # grey
     # black
     # white
 )
@@ -95,8 +95,8 @@ function testColors()
     @assert getColor(165, 0, 0.9) == "white"
     
     # Gray tests
-    @assert getColor(225, 0.05, 0.40) == "gray"
-    @assert getColor(45, 0.02, 0.42) == "gray"
+    @assert getColor(225, 0.05, 0.40) == "grey"
+    @assert getColor(45, 0.02, 0.42) == "grey"
     @assert getColor(225, 0, 0.80) == "white"
 
     # Full colors tests
@@ -138,5 +138,8 @@ colors_map = Dict(
         "grey" => "#808080",      
         "white" => "#FFFFFF"      
     )
+
+
+
 
 end # end module ColorUtils
