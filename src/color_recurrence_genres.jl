@@ -8,14 +8,21 @@ println(f)
 # Iterate over each CSV file
 for f in readdir("data/output/genreCSV/", join=true)
     data = CSV.read(f, DataFrame, delim = ',', select=1:13, silencewarnings=true)
+    fileName = last(split(f, "/"))
     # data = CSV.read("data/colorsData_HSV.csv", DataFrame,delim = ',',select=1:13,silencewarnings=true)
     #println(data)
 
     matrice = Matrix(data)
     matrice_nbL = length(matrice[:,1])
+    if matrice_nbL <= 0
+        println("[INFO] No data found for file " * fileName)
+        break
+    end
+
     matrice_nbC = length(matrice[1,:])
+    
+    println("===========")
     println(matrice_nbL," X ",matrice_nbC)
-    println()
 
     #-----------------------------Get colors from CSV----------------------------
     all_HSV_colors = String[]
@@ -61,6 +68,8 @@ for f in readdir("data/output/genreCSV/", join=true)
 
     totalCount = 0
 
+    println("Genre : " * fileName)
+    println()
     for (color,count) in hsv_colors_recurrence
         println(color, " : ", count)
         totalCount += count
@@ -73,9 +82,8 @@ for f in readdir("data/output/genreCSV/", join=true)
     color_counts = [hsv_colors_recurrence[name] for name in color_names]
     bar_colors = [ColorUtils.colors_map[name] for name in color_names]
 
-    g = last(split(f, "/"))
-    plot_bar = Plots.bar(color_names,color_counts,fillcolor = bar_colors, bar_width = 1, title = "Colors in HSV (" * g * ")", xlabel = "Color Names", ylabel = "Recurence", legend = false, xticks = :all, xrotation = 45,size=(1200,800),margin = 15Plots.mm )
-    savefig(plot_bar, "plots/hsv_color_rec" * g * ".png")
+    plot_bar = Plots.bar(color_names,color_counts,fillcolor = bar_colors, bar_width = 1, title = fileName, xlabel = "Color Names", ylabel = "Recurence", legend = false, xticks = :all, xrotation = 45,size=(1200,800),margin = 15Plots.mm )
+    savefig(plot_bar, "plots/hsv_color_rec" * fileName * ".png")
 end
 
 #-----------------------------------------------------------------------
