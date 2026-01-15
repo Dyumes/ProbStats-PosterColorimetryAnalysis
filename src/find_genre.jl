@@ -43,7 +43,9 @@ end
 all_HSV_colors = get_colors_from_CSV_by_3(data_matrice)
 
 #---------------------------- Genre Color Dictionary -------------------------
-genre_colors = genreColorMatching.get_genre_colors_names()
+#genre_colors = genreColorMatching.get_genre_colors_names()
+genre_colors = genreColorMatching.genre_colors_by_our_results_no_percent
+
 #println(genre_colors)
 #---------------------------- Color Matching Function -------------------------
 # Keep importance of dominant colors
@@ -232,7 +234,8 @@ for (i, count) in enumerate(counts_with)
     end
 end
 
-savefig(p1, "csv_genre_distribution_with_duplicates.png")
+#savefig(p1, "csv_genre_distribution_with_duplicates.png")
+savefig(p1, "no_percent_genre_distribution_with_duplicates.png")
 
 # Bar plot without duplicates
 p2 = bar(1:length(genre_order), counts_without,
@@ -253,6 +256,7 @@ for (i, count) in enumerate(counts_without)
     end
 end
 
-savefig(p2, "csv_genre_distribution_without_duplicates.png")
+#savefig(p2, "csv_genre_distribution_without_duplicates.png")
+savefig(p2, "no_percent_genre_distribution_without_duplicates.png")
 
 println("====================================================================================END========================================================================================================")

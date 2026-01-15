@@ -17,7 +17,7 @@ module genreColorMatching
         "Drama" => [(240, 0.5, 0.6), (350, 0.4, 0.65), (30, 0.45, 0.7)],
         "Fantasy" => [(280, 0.7, 0.85), (200, 0.65, 0.8), (140, 0.6, 0.75)],
         "Film-Noir" => [(0, 0.0, 0.1), (220, 0.2, 0.3), (0, 0.0, 0.0)],
-        "IMAX" => [(60, 0.7, 0.7), (240, 0.7, 0.8), (210, 0.8, 0.7)],
+        #"IMAX" => [(60, 0.7, 0.7), (240, 0.7, 0.8), (210, 0.8, 0.7)],
         "Horror" => [(0, 0.85, 0.6), (300, 0.7, 0.5), (260, 0.6, 0.4)],
         "Musical" => [(330, 0.8, 0.95), (60, 0.85, 0.95), (180, 0.75, 0.9)],
         "Mystery" => [(260, 0.6, 0.5), (210, 0.5, 0.45), (300, 0.55, 0.55)],
@@ -43,7 +43,7 @@ module genreColorMatching
         
 
 
-    genre_colors_by_our_results = Dict(
+    genre_colors_by_our_results_no_percent = Dict(
         "Action" => ["orange", "red", "light_blue"], 
         "Adventure" => ["orange", "light_blue", "red"],
         "Animation" => ["orange", "light_blue", "red"],
@@ -55,7 +55,7 @@ module genreColorMatching
         "Fantasy" => ["red","orange","yellow"],
         "Film-Noir" => ["yellow","red","orange"],
         "Horror" => ["red","orange","black"],
-        "IMAX" => ["yellow","blue", "light_blue"],
+        #"IMAX" => ["yellow","blue", "light_blue"],
         "Musical" => ["orange","red","yellow"],
         "Mystery" => ["orange","red","yellow"],
         "Romance" => ["orange","red","yellow"],
