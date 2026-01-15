@@ -33,10 +33,12 @@ function get_colors_from_CSV(matrice)
         push!(all_HSV_colors,color3)
     end
     #println(all_HSV_colors)
-    println(all_HSV_colors[1:10])
-    println()
-    println(length(all_HSV_colors))
-    println()
+    if (length(all_HSV_colors) > 10)
+        println(all_HSV_colors[1:10])
+        println()
+        println(length(all_HSV_colors))
+        println()
+    end
     return all_HSV_colors
 end
 
@@ -68,11 +70,11 @@ function get_color_recurrence_w_percent(input_path::String, genre_name, output_p
     end
 
     # Get colors from CSV
-    all_HSV_colors = get_colors_from_CSV(data_matrice)
+    all_HSV_colors = get_colors_from_CSV(matrice)
 
     # Count for each color how many times it appears
     for color in all_HSV_colors
-        value_to_add = (color[2] / 100)
+        value_to_add = color[2] / 100
         hsv_colors_recurrence[color[1]] += value_to_add
     end
 
@@ -89,7 +91,7 @@ function get_color_recurrence_w_percent(input_path::String, genre_name, output_p
     end
 
     #Order dico to match colors_list order
-    color_counts = [((hsv_colors_recurrence[name] / totalCount) * 100) for name in color_names]
+    color_counts = [hsv_colors_recurrence[name] for name in color_names]
     bar_colors = [ColorUtils.colors_map[name] for name in color_names]
 
     plot_bar = Plots.bar(
@@ -111,6 +113,7 @@ end
 
 function get_color_recurrence_w_percent_per_genre(path::String, debug::Bool=false)
     for f in readdir(path, join=true)
+        println("==========================================")
         fileName = last(split(f, "/"))
         if (debug) println("Genre : " * fileName) end
         if (debug) println("File : " * f) end
