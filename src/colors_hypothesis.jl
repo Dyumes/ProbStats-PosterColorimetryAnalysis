@@ -3,6 +3,7 @@ using  .ColorUtils
 # Veuillet Gaëtan
 # Genre's 3 most current colors for further comparisons
 module genreColorMatching
+    using ..ColorUtils
     export get_genre_colors_names
 
     genre_colors = Dict(
@@ -34,7 +35,7 @@ module genreColorMatching
             for (h, s, v) in colors
                 push!(converted_colors, ColorUtils.getColor(h, s, v))
             end
-            genre_colors_map[genre] = converted_colors
+            genre_colors_map[genre] = converted_colors            
         end
         return genre_colors_map
     end
