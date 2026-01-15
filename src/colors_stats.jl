@@ -114,6 +114,8 @@ println()
 println("TEST 4: ~50% of success")
 test_50 = generate_test_genres(genres_csv, 0.50)
 results_50 = check_if_colors_right(test_50, genres_csv)
+
+
 show_stats(results_50)
 println()
 
