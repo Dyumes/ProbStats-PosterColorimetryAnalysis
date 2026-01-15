@@ -120,6 +120,8 @@ function get_genre_results()
     return genre_results_with_duplicates,genre_results_without_duplicates
 end
 
+
+
 genre_results_with_duplicates,genre_results_without_duplicates = get_genre_results()
 
 
@@ -140,6 +142,7 @@ using StatsBase
 #     percentage = round(count / length(genre_results_without_duplicates) * 100, digits=1)
 #     println("$genre: $count ($percentage%)")
 # end
+# println()
 
 
 #-------------------------------------Stats on genre--------------------------------
@@ -176,5 +179,80 @@ colorsStats.show_stats(results_with_duplicates)
 results_without_duplicates = colorsStats.check_if_colors_right(genre_results_without_duplicates, first_genres)
 println("\n=== Results WITHOUT duplicates ===")
 colorsStats.show_stats(results_without_duplicates)
+
+
+
+#---------------------------- Genre Distribution (in genre_colors order) --------------------
+using StatsBase
+
+# Get counts
+genre_counts_with = countmap(genre_results_with_duplicates)
+genre_counts_without = countmap(genre_results_without_duplicates)
+
+# Get the order from genre_colors dictionary
+# Get the order from genre_colors dictionary - ALPHABETICALLY SORTED
+genre_order = [x[1] for x in sort(collect(genre_colors), by=x->uppercase(x[1]))]
+
+println("\nGenre distribution with duplicates:")
+for genre in genre_order
+    count = get(genre_counts_with, genre, 0)
+    percentage = round(count / length(genre_results_with_duplicates) * 100, digits=1)
+    println("$genre: $count ($percentage%)")
+end
+println()
+
+println("\nGenre distribution without duplicates:")
+for genre in genre_order
+    count = get(genre_counts_without, genre, 0)
+    percentage = round(count / length(genre_results_without_duplicates) * 100, digits=1)
+    println("$genre: $count ($percentage%)")
+end
+println()
+
+# Plotting
+counts_with = [get(genre_counts_with, genre, 0) for genre in genre_order]
+counts_without = [get(genre_counts_without, genre, 0) for genre in genre_order]
+
+# Bar plot with duplicates
+p1 = bar(1:length(genre_order), counts_with, 
+    title="Genre Distribution (with duplicates)",
+    xlabel="Genre", 
+    ylabel="Count",
+    xticks=(1:length(genre_order), genre_order),
+    legend=false,
+    xrotation=45,
+    bottom_margin=10Plots.mm,
+    top_margin=10Plots.mm)
+
+# Add value labels on bars BEFORE saving
+for (i, count) in enumerate(counts_with)
+    if count > 0  # Only show labels for non-zero bars
+        percentage = round(count / length(genre_results_with_duplicates) * 100, digits=1)
+        annotate!(p1, i, count + maximum(counts_with)*0.02, text("$count\n($percentage%)", 8, :bottom))
+    end
+end
+
+savefig(p1, "csv_genre_distribution_with_duplicates.png")
+
+# Bar plot without duplicates
+p2 = bar(1:length(genre_order), counts_without,
+    title="Genre Distribution (without duplicates)",
+    xlabel="Genre",
+    ylabel="Count",
+    xticks=(1:length(genre_order), genre_order),
+    legend=false,
+    xrotation=45,
+    bottom_margin=10Plots.mm,
+    top_margin=10Plots.mm)
+
+# Add value labels on bars BEFORE saving
+for (i, count) in enumerate(counts_without)
+    if count > 0  # Only show labels for non-zero bars
+        percentage = round(count / length(genre_results_without_duplicates) * 100, digits=1)
+        annotate!(p2, i, count + maximum(counts_without)*0.02, text("$count\n($percentage%)", 8, :bottom))
+    end
+end
+
+savefig(p2, "csv_genre_distribution_without_duplicates.png")
 
 println("====================================================================================END========================================================================================================")
